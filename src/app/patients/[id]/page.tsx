@@ -23,7 +23,14 @@ export default async function PatientPage({ params }: PatientPageProps) {
   if (!detail) notFound()
 
   return (
-    <AppShell title={detail.patient.name} eyebrow={`Patient Workspace · ${detail.patient.id}`}>
+    <AppShell
+      title={detail.patient.name}
+      breadcrumbs={[
+        { label: "Command Center", href: "/dashboard" },
+        { label: "Patients", href: "/patients" },
+        { label: `${detail.patient.id} · Workspace` },
+      ]}
+    >
       <PatientWorkspace detail={detail} />
     </AppShell>
   )

@@ -7,6 +7,8 @@ export type PatientStatus =
   | "Imaging"
   | "Treatment"
 
+export type AgentAnalysisStatus = "Complete" | "In progress" | "Not started"
+
 export type SyntheticPatient = {
   id: string
   name: string
@@ -19,6 +21,7 @@ export type SyntheticPatient = {
   waitMinutes: number
   alerts: string[]
   vitals: string
+  analysisStatus: AgentAnalysisStatus
 }
 
 export const departmentMetrics = {
@@ -45,6 +48,7 @@ export const syntheticPatients: SyntheticPatient[] = [
     waitMinutes: 0,
     alerts: ["Sepsis risk", "Severe penicillin allergy"],
     vitals: "BP 82/48 · HR 128 · SpO₂ 88%",
+    analysisStatus: "Complete",
   },
   {
     id: "MED-1038",
@@ -58,6 +62,7 @@ export const syntheticPatients: SyntheticPatient[] = [
     waitMinutes: 7,
     alerts: ["ST elevation suspected"],
     vitals: "BP 154/92 · HR 104 · SpO₂ 95%",
+    analysisStatus: "Complete",
   },
   {
     id: "MED-1035",
@@ -71,6 +76,7 @@ export const syntheticPatients: SyntheticPatient[] = [
     waitMinutes: 14,
     alerts: ["Pregnancy status pending"],
     vitals: "BP 108/70 · HR 112 · Temp 38.1°C",
+    analysisStatus: "In progress",
   },
   {
     id: "MED-1029",
@@ -84,6 +90,7 @@ export const syntheticPatients: SyntheticPatient[] = [
     waitMinutes: 4,
     alerts: ["Stroke pathway active"],
     vitals: "BP 188/102 · HR 86 · SpO₂ 97%",
+    analysisStatus: "In progress",
   },
   {
     id: "MED-1021",
@@ -97,6 +104,7 @@ export const syntheticPatients: SyntheticPatient[] = [
     waitMinutes: 32,
     alerts: [],
     vitals: "BP 118/74 · HR 102 · SpO₂ 93%",
+    analysisStatus: "Not started",
   },
 ]
 

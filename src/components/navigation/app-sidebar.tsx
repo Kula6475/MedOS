@@ -41,10 +41,7 @@ function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {primaryNavigation.map((item) => {
-                const isActive =
-                  item.href === "/dashboard"
-                    ? pathname.startsWith("/dashboard") || pathname.startsWith("/patients")
-                    : pathname.startsWith(item.href)
+                const isActive = pathname.startsWith(item.href)
 
                 return (
                   <SidebarMenuItem key={item.href}>

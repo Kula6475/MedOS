@@ -13,7 +13,7 @@ All patient data must be synthetic. MedOS is clinical decision support and not m
 - [x] Create `ARCHITECTURE.md`.
 - [x] Create `TASKS.md`.
 - [x] Create `CLAUDE.md`.
-- [ ] Review all documentation before scaffolding.
+- [x] Review all documentation before scaffolding.
 - [ ] Confirm the primary synthetic patient scenario.
 - [ ] Confirm the Fireworks model available to the team.
 - [ ] Create Braintrust and Fireworks project credentials.
@@ -21,47 +21,47 @@ All patient data must be synthetic. MedOS is clinical decision support and not m
 
 ## 1. Project foundation
 
-- [ ] Scaffold Next.js with the App Router and TypeScript.
-- [ ] Configure Tailwind CSS.
-- [ ] Configure shadcn/ui.
-- [ ] Add lint, type-check, and production-build scripts.
-- [ ] Add `.env.example` with variable names only.
-- [ ] Ensure `.env.local` and other secret files are ignored.
-- [ ] Add shared project types.
-- [ ] Add Zod schemas for patient data and agent results.
+- [x] Scaffold Next.js with the App Router and TypeScript.
+- [x] Configure Tailwind CSS.
+- [x] Configure shadcn/ui.
+- [x] Add lint, type-check, and production-build scripts.
+- [ ] Add `.env.example` with variable names only. *(no backend integration exists yet to enumerate variables for)*
+- [x] Ensure `.env.local` and other secret files are ignored.
+- [x] Add shared project types. *(typed mock-data modules under `src/lib`; Zod contracts still pending real agent integration)*
+- [ ] Add Zod schemas for patient data and agent results. *(backend/agent task — no Zod dependency yet)*
 
 ## 2. Synthetic patient data
 
-- [ ] Create the showcase critical patient fixture.
-- [ ] Create five smaller supporting patient fixtures for the queue.
-- [ ] Add demographics, history, medications, allergies, vitals, labs, imaging reports, notes, and timeline events.
-- [ ] Give clinical facts stable evidence-reference paths.
-- [ ] Label every fixture and relevant UI surface as synthetic.
-- [ ] Validate fixtures at application startup or test time.
-- [ ] Create expected findings for offline evaluation tests.
+- [x] Create the showcase critical patient fixture.
+- [x] Create five smaller supporting patient fixtures for the queue.
+- [x] Add demographics, history, medications, allergies, vitals, labs, imaging reports, notes, and timeline events.
+- [ ] Give clinical facts stable evidence-reference paths. *(evidence strings exist per agent card; not yet a formal reference-ID system)*
+- [x] Label every fixture and relevant UI surface as synthetic.
+- [ ] Validate fixtures at application startup or test time. *(backend/test task)*
+- [ ] Create expected findings for offline evaluation tests. *(backend/eval task)*
 
 ## 3. Dashboard
 
-- [ ] Build the responsive application shell.
-- [ ] Add emergency-department census and resource cards.
-- [ ] Add patient queue sorting by acuity and wait time.
-- [ ] Add severity, status, and alert badges.
-- [ ] Add ICU bed and resource-utilization indicators.
-- [ ] Add persistent “Braintrust monitored” branding.
-- [ ] Link patient rows to their workspace.
+- [x] Build the responsive application shell.
+- [x] Add emergency-department census and resource cards.
+- [x] Add patient queue sorting by acuity and wait time.
+- [x] Add severity, status, and alert badges.
+- [x] Add ICU bed and resource-utilization indicators.
+- [x] Add persistent “Braintrust monitored” branding.
+- [x] Link patient rows to their workspace.
 
 ## 4. Patient workspace
 
-- [ ] Add patient header and safety disclaimer.
-- [ ] Add demographics and history.
-- [ ] Add medications and allergies.
-- [ ] Add vital signs and trends.
-- [ ] Add laboratory results.
-- [ ] Add imaging reports.
-- [ ] Add clinical notes.
-- [ ] Add the event timeline.
-- [ ] Add the AI command panel and analysis button.
-- [ ] Add empty, loading, partial, completed, review, blocked, and failure states.
+- [x] Add patient header and safety disclaimer.
+- [x] Add demographics and history.
+- [x] Add medications and allergies.
+- [x] Add vital signs and trends.
+- [x] Add laboratory results.
+- [x] Add imaging reports.
+- [x] Add clinical notes.
+- [x] Add the event timeline.
+- [x] Add the AI command panel and analysis button.
+- [ ] Add empty, loading, partial, completed, review, blocked, and failure states. *(pending, running, evaluating, complete, review-score, and a simulated failure+retry state are implemented in the UI; a distinct "blocked" evaluation state has no real safety gate to drive it yet)*
 
 ## 5. Shared agent infrastructure
 
@@ -165,13 +165,28 @@ All patient data must be synthetic. MedOS is clinical decision support and not m
 
 ## 12. UI polish
 
-- [ ] Add professional loading and completion animations.
-- [ ] Keep motion restrained and readable.
-- [ ] Verify color contrast and keyboard navigation.
-- [ ] Verify dashboard and patient workspace at presentation resolution.
-- [ ] Add explicit synthetic-data and decision-support labels.
-- [ ] Remove placeholder text and dead controls.
-- [ ] Make Braintrust more visually prominent than secondary integrations.
+- [x] Add professional loading and completion animations.
+- [x] Keep motion restrained and readable; `prefers-reduced-motion` respected throughout.
+- [ ] Verify color contrast and keyboard navigation. *(built with focus-visible states and keyboard handlers throughout; not run through an automated a11y audit — see §13)*
+- [ ] Verify dashboard and patient workspace at presentation resolution. *(could not launch a live dev server this session — see §13)*
+- [x] Add explicit synthetic-data and decision-support labels.
+- [x] Remove placeholder text and dead controls. *(every visible button now functions, navigates, or updates local state)*
+- [x] Make Braintrust more visually prominent than secondary integrations.
+
+## 12a. Frontend build session — 2026-07-24
+
+Gap-filled the frontend against the existing (already substantial) implementation. New/changed:
+
+- Added `/patients` (full queue: search, severity/status/department filters, sort by wait, table+card responsive layout, loading skeleton, empty/no-results states, severity legend).
+- Added `/agents` (five specialized-agent cards with simulated metrics, opens a details sheet with responsibilities/inputs/outputs/constraints/safety checks).
+- Added search field, notifications menu, profile menu, and a system-status indicator to the shared top navigation; added optional breadcrumb support.
+- Added `Patients` and `Agents` to sidebar navigation; fixed active-state highlighting.
+- Added a simulated failure + retry state to the "Analyze Patient" multi-agent workflow (deterministic, opt-in via a "Simulate failure" control — the default run always completes).
+- Added a "Critical patients" dashboard metric card.
+
+**Not done in this session (explicitly out of scope for a frontend-only pass):** any real Fireworks or Braintrust integration, Zod schemas, `.env.example`, fixture validation, or a true safety-gate "blocked" state — all remain backend/agent-orchestration work per §5–§11 above.
+
+**Verification caveat:** this machine has no Node.js/npm installed, so `npm run lint`, `npm run build`, and a live dev-server/browser pass could not be run this session. Changes were verified by careful manual code review against existing patterns instead. Run the commands in §13 locally before treating this as demo-ready.
 
 ## 13. Verification
 
