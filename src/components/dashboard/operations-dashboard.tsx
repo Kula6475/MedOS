@@ -13,6 +13,7 @@ import {
   Gauge,
   HeartPulse,
   ShieldCheck,
+  Siren,
   UsersRound,
   Zap,
 } from "lucide-react"
@@ -30,8 +31,11 @@ import {
   hospitalUtilization,
   inferenceStatus,
   observabilityMetrics,
+  syntheticPatients,
 } from "@/lib/mock-hospital-data"
 import { cn } from "@/lib/utils"
+
+const criticalPatientCount = syntheticPatients.filter((patient) => patient.acuity === "ESI 1").length
 
 const barTone = { primary: "bg-primary", warning: "bg-warning", info: "bg-info", trust: "bg-trust" }
 
@@ -133,8 +137,9 @@ function OperationsDashboard() {
         <div className="flex items-center gap-2 rounded-lg bg-card/75 px-3 py-2 text-xs ring-1 ring-border"><Activity className="size-4 text-primary" /><span className="text-muted-foreground">Department state</span><span className="font-medium text-warning">High census</span></div>
       </PageReveal>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-7">
         <MetricCard label="Active patients" value={departmentMetrics.activePatients} helper={`of ${departmentMetrics.capacity} capacity`} trend="+6 this hour" icon={UsersRound} delay={0.04} />
+        <MetricCard label="Critical patients" value={criticalPatientCount} helper="ESI 1 · immediate" icon={Siren} tone="critical" delay={0.06} />
         <MetricCard label="ICU beds available" value={departmentMetrics.icuBedsAvailable} helper={`of ${departmentMetrics.icuBedsTotal} total`} icon={BedDouble} tone="warning" delay={0.08} />
         <MetricCard label="Emergency alerts" value={departmentMetrics.emergencyAlerts} helper="2 high priority" icon={AlertTriangle} tone="critical" delay={0.12} />
         <MetricCard label="Average wait" value={departmentMetrics.averageWaitMinutes} suffix="m" helper="door to clinician" trend="↓ 4m" icon={Clock3} tone="info" delay={0.16} />
