@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
-import { runAnalysis } from "@/lib/orchestrator"
+import { getPatient, saveAnalysis } from "@/lib/db"
+import { runAnalysis, type AnalysisOrchestratorResult } from "@/lib/orchestrator"
 import { analyzePatientRequestSchema, apiErrorResponseSchema, type APIErrorResponse } from "@/lib/schemas"
 
 export const dynamic = "force-dynamic"
@@ -61,10 +62,29 @@ export async function POST(request: Request) {
     }
 
     const input = parsedRequest.data
-    const result = await runAnalysis("patientId" in input ? { patientId: input.patientId } : { patient: input.patient })
+
+    // Resolve the patient through the repository (database when configured, synthetic fixtures
+    // otherwise) so analyses run against patients added at runtime as well as the seeded set.
+    let result: AnalysisOrchestratorResult
+    if ("patientId" in input) {
+      const patient = await getPatient(input.patientId)
+      if (!patient) {
+        return errorResponse(404, "patient_not_found", `No patient record found for id "${input.patientId}".`)
+      }
+      result = await runAnalysis({ patient })
+    } else {
+      result = await runAnalysis({ patient: input.patient })
+    }
 
     if (!result.ok) {
       return errorResponse(statusForErrorCode(result.error.code), result.error.code, result.error.message)
+    }
+
+    // Best-effort persistence: a storage failure must never break the analysis response.
+    try {
+      await saveAnalysis(result.analysis)
+    } catch (error) {
+      console.warn("[api/analyze] analysis persistence failed:", error instanceof Error ? error.message : error)
     }
 
     return jsonResponse(result.analysis, 200)
