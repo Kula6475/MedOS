@@ -1,12 +1,13 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
-import { AlertTriangle, Clock3 } from "lucide-react"
+import { AlertTriangle, ArrowUpRight, Clock3 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { DataTableFrame } from "@/components/design-system/data-table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { syntheticPatients, type PatientAcuity } from "@/lib/mock-hospital-data"
 
@@ -25,6 +26,7 @@ function PatientQueue() {
     <DataTableFrame
       title="Patient queue"
       description="Acuity-ranked emergency department census"
+      action={<Button variant="ghost" size="xs" render={<Link href="/patients" />}>View full queue<ArrowUpRight /></Button>}
       className="min-w-0"
     >
       <Table>

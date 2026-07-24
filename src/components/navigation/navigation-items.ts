@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, LayoutDashboard, Settings, ShieldCheck, type LucideIcon } from "lucide-react"
+import { BrainCircuit, ChartNoAxesCombined, LayoutDashboard, Settings, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react"
 
 export type NavigationItem = {
   label: string
@@ -13,6 +13,18 @@ export const primaryNavigation: NavigationItem[] = [
     href: "/dashboard",
     icon: LayoutDashboard,
     description: "Emergency department operations overview",
+  },
+  {
+    label: "Patients",
+    href: "/patients",
+    icon: UsersRound,
+    description: "Full synthetic patient queue",
+  },
+  {
+    label: "Agents",
+    href: "/agents",
+    icon: BrainCircuit,
+    description: "Specialized AI agent performance and coverage",
   },
   {
     label: "Analytics",

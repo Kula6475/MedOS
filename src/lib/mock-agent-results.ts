@@ -1,12 +1,13 @@
 import type { PatientDetail } from "@/lib/mock-patient-details"
 
-export type AgentPhase = "Pending" | "Running" | "Evaluating" | "Complete"
+export type AgentPhase = "Pending" | "Running" | "Evaluating" | "Complete" | "Failed"
 
 export type MockAgentResult = {
   id: "triage" | "medication" | "labs" | "imaging" | "coordination"
   name: string
   activeMessage: string
   evaluatingMessage: string
+  failureMessage: string
   recommendation: string
   evidence: string[]
   confidence: number
@@ -32,6 +33,7 @@ export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
       name: "Triage Agent",
       activeMessage: "Reviewing symptoms, vitals, and arrival data",
       evaluatingMessage: "Checking acuity consistency and evidence coverage",
+      failureMessage: "Fireworks inference timed out before returning a structured result",
       recommendation: patient.acuity === "ESI 1"
         ? "Maintain ESI 1 priority with immediate resuscitation-team attention."
         : `Maintain ${patient.acuity} priority and continue time-sensitive clinical evaluation.`,
@@ -47,6 +49,7 @@ export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
       name: "Medication Safety Agent",
       activeMessage: "Checking medications, allergies, and renal considerations",
       evaluatingMessage: "Scoring allergy recall and contraindication coverage",
+      failureMessage: "Fireworks inference timed out before returning a structured result",
       recommendation: severeAllergy
         ? `Avoid ${severeAllergy.substance}-class exposure and require pharmacist review before antimicrobial selection.`
         : "Reconcile the active medication list and verify recent doses before treatment changes.",
@@ -65,6 +68,7 @@ export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
       name: "Lab Analysis Agent",
       activeMessage: "Analyzing abnormal values and critical trends",
       evaluatingMessage: "Validating result references and missing-test coverage",
+      failureMessage: "Fireworks inference timed out before returning a structured result",
       recommendation: abnormalLabs.length
         ? `Prioritize review of ${abnormalLabs.slice(0, 2).map((lab) => lab.test).join(" and ")}; trend results after intervention.`
         : "No critical laboratory abnormality identified; continue condition-specific monitoring.",
@@ -80,6 +84,7 @@ export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
       name: "Imaging Review Agent",
       activeMessage: "Extracting findings from the written imaging report",
       evaluatingMessage: "Checking report fidelity and unsupported-claim risk",
+      failureMessage: "Fireworks inference timed out before returning a structured result",
       recommendation: trimEvidence(detail.imaging[0].impression),
       evidence: [detail.imaging[0].study, trimEvidence(detail.imaging[0].findings)],
       confidence: detail.imaging[0].impression.toLowerCase().includes("pending") ? 82 : 94,
@@ -93,6 +98,7 @@ export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
       name: "Care Coordination Agent",
       activeMessage: "Synthesizing validated specialist outputs",
       evaluatingMessage: "Running final safety and human-review checks",
+      failureMessage: "Coordination could not complete because a specialist result was unavailable",
       recommendation: firstRecommendation.action,
       evidence: [
         `Triage: ${patient.acuity} · ${patient.status}`,
