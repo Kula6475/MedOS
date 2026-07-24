@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeInitializer } from "@/components/settings/theme-initializer";
+import { MedOSCopilotProvider } from "@/components/copilot/medos-copilot";
+import "@copilotkit/react-core/v2/styles.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -65,7 +67,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeInitializer />
-        <TooltipProvider>{children}</TooltipProvider>
+        <MedOSCopilotProvider
+          configured={Boolean(process.env.FIREWORKS_API_KEY)}
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </MedOSCopilotProvider>
       </body>
     </html>
   );
