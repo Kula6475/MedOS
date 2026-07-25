@@ -129,6 +129,60 @@ describe("Braintrust provider selection", () => {
   })
 })
 
+describe("Braintrust trace link safety", () => {
+  class LinkSpan extends FakeSpan {
+    constructor(private readonly linkValue: string | (() => never)) {
+      super("root", "root-1", "root-1", {})
+    }
+    link(): string {
+      return typeof this.linkValue === "function" ? this.linkValue() : this.linkValue
+    }
+  }
+  class LinkLogger extends FakeLogger {
+    constructor(private readonly makeRoot: () => FakeSpan) {
+      super()
+    }
+    startSpan(): FakeSpan {
+      const root = this.makeRoot()
+      this.roots.push(root)
+      return root
+    }
+  }
+  function traceUrlFor(makeRoot: () => FakeSpan, extra: { orgName?: string; appUrl?: string } = {}) {
+    const observability = new BraintrustObservabilityProvider({
+      apiKey: "test-key-never-logged",
+      projectName: "MedOS",
+      logger: new LinkLogger(makeRoot),
+      maskingSetter: () => undefined,
+      ...extra,
+    })
+    return observability.startAnalysisTrace({ analysisId: "a1", patientId: "p1" }).traceUrl
+  }
+
+  it("never surfaces the SDK error-generating-link placeholder (the 404 cause)", () => {
+    expect(
+      traceUrlFor(() => new LinkSpan("https://braintrust.dev/error-generating-link?msg=log-in-or-provide-org-name")),
+    ).toBeUndefined()
+  })
+
+  it("uses a genuine permalink when the SDK returns one", () => {
+    expect(traceUrlFor(() => new LinkSpan("https://www.braintrust.dev/app/acme/logs#span"))).toBe(
+      "https://www.braintrust.dev/app/acme/logs#span",
+    )
+  })
+
+  it("falls back to the project logs URL when the org is known but no permalink is available", () => {
+    const url = traceUrlFor(
+      () =>
+        new LinkSpan(() => {
+          throw new Error("no link")
+        }),
+      { orgName: "acme", appUrl: "https://www.braintrust.dev/" },
+    )
+    expect(url).toBe("https://www.braintrust.dev/app/acme/p/MedOS/logs")
+  })
+})
+
 describe("Braintrust trace lifecycle", () => {
   it("creates one root and exactly five direct agent children, then ends and flushes them", async () => {
     const { logger, observability } = provider()

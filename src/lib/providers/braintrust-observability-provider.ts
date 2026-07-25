@@ -142,6 +142,8 @@ export class BraintrustObservabilityProvider implements ObservabilityProvider {
   readonly name = "braintrust" as const
   private readonly logger: BraintrustLoggerLike
   private readonly projectName: string
+  private readonly orgName?: string
+  private readonly appUrl: string
   private readonly local: ObservabilityProvider
   private readonly roots = new Map<string, BraintrustSpanLike>()
   private readonly spans = new Map<string, BraintrustSpanLike>()
@@ -154,6 +156,8 @@ export class BraintrustObservabilityProvider implements ObservabilityProvider {
     const apiKey = options.apiKey.trim()
     if (!apiKey) throw new Error("Braintrust configuration is incomplete.")
     this.projectName = options.projectName.trim() || "MedOS"
+    this.orgName = options.orgName?.trim() || undefined
+    this.appUrl = (options.appUrl?.trim() || "https://www.braintrust.dev").replace(/\/+$/, "")
     this.local = options.localFallback ?? new LocalObservabilityProvider()
 
     const maskingSetter = options.maskingSetter ?? setMaskingFunction
@@ -201,9 +205,19 @@ export class BraintrustObservabilityProvider implements ObservabilityProvider {
       let traceUrl: string | undefined
       try {
         const link = root.link()
-        if (/^https:\/\//i.test(link)) traceUrl = link
+        // The SDK returns an "error-generating-link" placeholder when it cannot resolve the org
+        // (e.g. BRAINTRUST_ORG_NAME unset or an invalid API key). That URL 404s, so never surface
+        // it — only a genuine permalink is used.
+        if (/^https:\/\//i.test(link) && !link.includes("error-generating-link")) {
+          traceUrl = link
+        }
       } catch {
         safeWarning("trace_link_failure")
+      }
+      // When the org is known but a per-span permalink was unavailable, fall back to the project's
+      // Logs view so the link resolves to a real Braintrust page instead of a dead URL.
+      if (!traceUrl && this.orgName) {
+        traceUrl = `${this.appUrl}/app/${encodeURIComponent(this.orgName)}/p/${encodeURIComponent(this.projectName)}/logs`
       }
       const trace: AnalysisTraceHandle = {
         kind: "trace",
