@@ -21,6 +21,39 @@ function trimEvidence(value: string) {
   return value.length > 92 ? `${value.slice(0, 89)}…` : value
 }
 
+// Placeholder scaffolding for the agent cards when there is no preloaded PatientDetail (e.g. the
+// "New Analysis" flow for uploaded/free-text patients). These values are only shown before the
+// live analysis returns and are then replaced by real agent results.
+export function getGenericAgentDefaults(): MockAgentResult[] {
+  const base = (
+    id: MockAgentResult["id"],
+    name: string,
+    activeMessage: string,
+    evaluatingMessage: string,
+  ): MockAgentResult => ({
+    id,
+    name,
+    activeMessage,
+    evaluatingMessage,
+    failureMessage: "Fireworks inference did not return a structured result",
+    recommendation: "Awaiting live analysis.",
+    evidence: [],
+    confidence: 0,
+    latency: 0,
+    evaluation: "Pass",
+    evaluationScore: 0,
+    model: "accounts/fireworks/models/gpt-oss-120b",
+  })
+
+  return [
+    base("triage", "Triage Agent", "Reviewing symptoms, vitals, and arrival data", "Checking acuity consistency and evidence coverage"),
+    base("medication", "Medication Safety Agent", "Checking medications, allergies, and renal considerations", "Scoring allergy recall and contraindication coverage"),
+    base("labs", "Lab Analysis Agent", "Analyzing abnormal values and critical trends", "Validating result references and missing-test coverage"),
+    base("imaging", "Imaging Review Agent", "Extracting findings from the written imaging report", "Checking report fidelity and unsupported-claim risk"),
+    base("coordination", "Care Coordination Agent", "Synthesizing validated specialist outputs", "Running final safety and human-review checks"),
+  ]
+}
+
 export function getMockAgentResults(detail: PatientDetail): MockAgentResult[] {
   const { patient } = detail
   const abnormalLabs = detail.labs.filter((lab) => lab.status !== "normal" && lab.status !== "pending")

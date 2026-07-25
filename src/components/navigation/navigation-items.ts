@@ -1,4 +1,4 @@
-import { BrainCircuit, ChartNoAxesCombined, LayoutDashboard, Settings, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react"
+import { BrainCircuit, ChartNoAxesCombined, FilePlus2, LayoutDashboard, Settings, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react"
 
 export type NavigationItem = {
   label: string
@@ -19,6 +19,12 @@ export const primaryNavigation: NavigationItem[] = [
     href: "/patients",
     icon: UsersRound,
     description: "Full synthetic patient queue",
+  },
+  {
+    label: "New Analysis",
+    href: "/analyze",
+    icon: FilePlus2,
+    description: "Upload or describe a new patient for live agent analysis",
   },
   {
     label: "Agents",

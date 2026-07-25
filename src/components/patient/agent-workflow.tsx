@@ -28,9 +28,9 @@ import { PageReveal } from "@/components/motion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getMockAgentResults, type AgentPhase, type MockAgentResult } from "@/lib/mock-agent-results"
+import { getGenericAgentDefaults, getMockAgentResults, type AgentPhase, type MockAgentResult } from "@/lib/mock-agent-results"
 import type { PatientDetail } from "@/lib/mock-patient-details"
-import type { AgentName, AgentResult, PatientAnalysis } from "@/lib/schemas"
+import type { AgentName, AgentResult, PatientAnalysis, PatientRecord } from "@/lib/schemas"
 import { cn } from "@/lib/utils"
 
 const phases: AgentPhase[] = ["Pending", "Running", "Evaluating", "Complete"]
@@ -187,8 +187,14 @@ function AgentCard({ agent, phase, index, onRetry }: { agent: DisplayAgentResult
   )
 }
 
-function AgentWorkflow({ detail }: { detail: PatientDetail }) {
-  const defaults = useMemo(() => getMockAgentResults(detail), [detail])
+// Accepts either a preloaded PatientDetail (fixture patient pages) or an inline PatientRecord
+// (the New Analysis flow for uploaded/free-text patients). Exactly one should be provided.
+function AgentWorkflow({ detail, patient }: { detail?: PatientDetail; patient?: PatientRecord }) {
+  const defaults = useMemo(() => (detail ? getMockAgentResults(detail) : getGenericAgentDefaults()), [detail])
+  const analyzeBody = useMemo(
+    () => (patient ? { patient } : detail ? { patientId: detail.patient.id } : null),
+    [patient, detail],
+  )
   const reduceMotion = useReducedMotion()
   const [agents, setAgents] = useState<DisplayAgentResult[]>(() => defaults.map((agent) => ({ ...agent, provider: "mock", fallbackUsed: true })))
   const [statuses, setStatuses] = useState<AgentPhase[]>(defaults.map(() => "Pending"))
@@ -221,7 +227,7 @@ function AgentWorkflow({ detail }: { detail: PatientDetail }) {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientId: detail.patient.id }),
+        body: JSON.stringify(analyzeBody),
         signal: controller.current.signal,
       })
       const payload: unknown = await response.json()

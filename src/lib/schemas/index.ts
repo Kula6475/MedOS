@@ -1,4 +1,5 @@
 export * from "./patient"
+export * from "./intake"
 export * from "./evidence-ref"
 export * from "./agent"
 export * from "./agent-result"
